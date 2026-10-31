@@ -44,7 +44,7 @@ portHandler = PortHandler(DEVICENAME)
 packetHandler = sts(portHandler)
 groupSyncRead = GroupSyncRead(packetHandler, STS_PRESENT_POSITION_L, 11)
 
-# Generic 
+# Generic function to set up ports
 def port_setup():
     global portHandler, packetHandler
     # Open port
@@ -121,6 +121,7 @@ def go_to_position(x, y):
             break
         
 
+# Main loop: add the actual code in here
 if __name__ == "__main__":
     port_setup()
     
