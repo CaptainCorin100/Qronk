@@ -29,8 +29,8 @@ STS_MOVING_SPEED            = 2400          # SCServo moving speed
 STS_MOVING_ACC              = 50            # SCServo moving acc
 
 # Servo IDs for relevant limbs
-SHOULDER_ID = 9
-FLOAT_ID = 2
+SHOULDER_ID = 6
+FLOAT_ID = 11
 
 # If, when looking at a motor, a clockwise motion lowers the leg from neutral, then it has a direction of 1. Reverse case, -1.
 SHOULDER_DIRECT = 1
@@ -44,6 +44,7 @@ portHandler = PortHandler(DEVICENAME)
 packetHandler = sts(portHandler)
 groupSyncRead = GroupSyncRead(packetHandler, STS_PRESENT_POSITION_L, 11)
 
+# Generic 
 def port_setup():
     global portHandler, packetHandler
     # Open port
