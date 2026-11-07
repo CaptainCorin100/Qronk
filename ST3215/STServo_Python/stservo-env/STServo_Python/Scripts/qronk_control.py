@@ -4,9 +4,6 @@ import time
 import math
 from tkinter import *
 
-angle_1 = 180
-angle_2 = 180
-
 if os.name == 'nt':
     import msvcrt
     def getch():
@@ -44,30 +41,33 @@ FLOAT_DIRECT = -1
 L0 = 60
 L1 = 100
 
-# portHandler = PortHandler(DEVICENAME)
-# packetHandler = sts(portHandler)
-# groupSyncRead = GroupSyncRead(packetHandler, STS_PRESENT_POSITION_L, 11)
+pos_x = L0
+pos_y = L1
 
-# # Generic function to set up ports
-# def port_setup():
-#     global portHandler, packetHandler
-#     # Open port
-#     if portHandler.openPort():
-#         print("Succeeded to open the port")
-#     else:
-#         print("Failed to open the port")
-#         print("Press any key to terminate...")
-#         getch()
-#         quit()
+portHandler = PortHandler(DEVICENAME)
+packetHandler = sts(portHandler)
+groupSyncRead = GroupSyncRead(packetHandler, STS_PRESENT_POSITION_L, 11)
 
-#     # Set port baudrate
-#     if portHandler.setBaudRate(BAUDRATE):
-#         print("Succeeded to change the baudrate")
-#     else:
-#         print("Failed to change the baudrate")
-#         print("Press any key to terminate...")
-#         getch()
-#         quit()
+# Generic function to set up ports
+def port_setup():
+    global portHandler, packetHandler
+    # Open port
+    if portHandler.openPort():
+        print("Succeeded to open the port")
+    else:
+        print("Failed to open the port")
+        print("Press any key to terminate...")
+        getch()
+        quit()
+
+    # Set port baudrate
+    if portHandler.setBaudRate(BAUDRATE):
+        print("Succeeded to change the baudrate")
+    else:
+        print("Failed to change the baudrate")
+        print("Press any key to terminate...")
+        getch()
+        quit()
 
 # Convert a position in mm to a set of IK angles
 def convert_position_angle(x,y):
@@ -94,52 +94,59 @@ def convert_angles_leg_motion(theta0, theta1, shoulder_direction, float_directio
 def go_to_angle(th0, th1):
     (a0, a1) = convert_angles_leg_motion(th0, th1, SHOULDER_DIRECT, FLOAT_DIRECT)
 
-#     print("Shoulder pos: {}, Float pos: {}".format(a0, a1))
+    print("Shoulder pos: {}, Float pos: {}".format(a0, a1))
 
-#     sts_addparam_result_shoulder = packetHandler.SyncWritePosEx(SHOULDER_ID, a0, STS_MOVING_SPEED, STS_MOVING_ACC)
-#     sts_addparam_result_float = packetHandler.SyncWritePosEx(FLOAT_ID, a1, STS_MOVING_SPEED, STS_MOVING_ACC)
+    sts_addparam_result_shoulder = packetHandler.SyncWritePosEx(SHOULDER_ID, a0, STS_MOVING_SPEED, STS_MOVING_ACC)
+    sts_addparam_result_float = packetHandler.SyncWritePosEx(FLOAT_ID, a1, STS_MOVING_SPEED, STS_MOVING_ACC)
 
-#     sts_comm_result = packetHandler.groupSyncWrite.txPacket()
+    sts_comm_result = packetHandler.groupSyncWrite.txPacket()
 
-#     # Clear syncwrite parameter storage
-#     packetHandler.groupSyncWrite.clearParam()
-#     time.sleep(0.002) #wait for servo status moving=1
+    # Clear syncwrite parameter storage
+    packetHandler.groupSyncWrite.clearParam()
+    time.sleep(0.002) #wait for servo status moving=1
 
-#     while 1:
-#         sts_addparam_result_shoulder = groupSyncRead.addParam(SHOULDER_ID)
-#         sts_addparam_result_float = groupSyncRead.addParam(FLOAT_ID)
+    while 1:
+        sts_addparam_result_shoulder = groupSyncRead.addParam(SHOULDER_ID)
+        sts_addparam_result_float = groupSyncRead.addParam(FLOAT_ID)
 
-#         sts_comm_result = groupSyncRead.txRxPacket()
+        sts_comm_result = groupSyncRead.txRxPacket()
 
-#         sts_last_moving = 0
+        sts_last_moving = 0
 
-#         for sts_id in (SHOULDER_ID, FLOAT_ID):
-#             sts_data_result, sts_error = groupSyncRead.isAvailable(sts_id, STS_PRESENT_POSITION_L, 11)
+        for sts_id in (SHOULDER_ID, FLOAT_ID):
+            sts_data_result, sts_error = groupSyncRead.isAvailable(sts_id, STS_PRESENT_POSITION_L, 11)
             
-#             if sts_data_result == True and groupSyncRead.getData(sts_id, STS_MOVING, 1) == 1:
-#                 sts_last_moving = 1
+            if sts_data_result == True and groupSyncRead.getData(sts_id, STS_MOVING, 1) == 1:
+                sts_last_moving = 1
 
-#         groupSyncRead.clearParam()
-#         if sts_last_moving==0:
-#             break
+        groupSyncRead.clearParam()
+        if sts_last_moving==0:
+            break
 
 def update_motor_1(a):
-    angle_1 = int(a)
-    go_to_angle(angle_1, angle_2)
+    global pos_x
+    pos_x = float(a)
+    (th0, th1) = convert_position_angle(pos_x, pos_y)
+    go_to_angle(th0, th1)
 
 def update_motor_2(a):
-    angle_2 = int(a)
-    go_to_angle(angle_1, angle_2)
+    global pos_y
+    pos_y = float(a)
+    (th0, th1) = convert_position_angle(pos_x, pos_y)
+    go_to_angle(th0, th1)
 
 # Main loop: add the actual code in here
 if __name__ == "__main__":
-    # port_setup()
+    port_setup()
 
     root = Tk()
-    root.geometry("400x300")
+    root.geometry("1600x900")
 
-    scale_1 = Scale(root, from_=0, to=360, resolution=1, orient=HORIZONTAL, label="Motor 1", command=update_motor_1)
-    scale_2 = Scale(root, from_=0, to=360, resolution=1, orient=HORIZONTAL, label="Motor 2", command=update_motor_2)
+    scale_1 = Scale(root, from_=-2*L0, to=2*L0, resolution=1, orient=HORIZONTAL, label="Y Pos", command=update_motor_1, length=800)
+    scale_2 = Scale(root, from_=-2*L1, to=2*L1, resolution=1, orient=HORIZONTAL, label="X Pos", command=update_motor_2, length=800)
+    scale_1.set(pos_x)
+    scale_2.set(pos_y)
+
 
     scale_1.pack(anchor=CENTER)
     scale_2.pack(anchor=CENTER)
