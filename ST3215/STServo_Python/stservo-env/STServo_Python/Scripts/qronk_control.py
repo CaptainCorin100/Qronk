@@ -30,12 +30,12 @@ STS_MOVING_SPEED            = 2400          # SCServo moving speed
 STS_MOVING_ACC              = 50            # SCServo moving acc
 
 # Servo IDs for relevant limbs
-SHOULDER_ID = 6
-FLOAT_ID = 11
+SHOULDER_ID = 11
+FLOAT_ID = 6
 
 # If, when looking at a motor, a clockwise motion lowers the leg from neutral, then it has a direction of 1. Reverse case, -1.
-SHOULDER_DIRECT = 1
-FLOAT_DIRECT = -1
+SHOULDER_DIRECT = -1
+FLOAT_DIRECT = 1
 
 # Length of limbs
 L0 = 60
@@ -86,7 +86,7 @@ def convert_angles_leg_motion(theta0, theta1, shoulder_direction, float_directio
 
     # Servo angle ranges from 0 to 4095, middle position is 2047
     shoulder_pos = int(2047 + (shoulder_direction * rad_to_motor(theta0)))
-    float_pos = int(2047 + (float_direction * rad_to_motor(theta0 + theta1 - math.pi/2)))
+    float_pos = int(2047 + (float_direction * rad_to_motor(theta0 + theta1)))
 
     return (shoulder_pos, float_pos)
 
@@ -142,8 +142,8 @@ if __name__ == "__main__":
     root = Tk()
     root.geometry("1600x900")
 
-    scale_1 = Scale(root, from_=-2*L0, to=2*L0, resolution=1, orient=HORIZONTAL, label="Y Pos", command=update_motor_1, length=800)
-    scale_2 = Scale(root, from_=-2*L1, to=2*L1, resolution=1, orient=HORIZONTAL, label="X Pos", command=update_motor_2, length=800)
+    scale_1 = Scale(root, from_=-4*L0, to=2*L0, resolution=1, orient=HORIZONTAL, label="X Pos", command=update_motor_1, length=800)
+    scale_2 = Scale(root, from_=0, to=2*L1, resolution=1, orient=HORIZONTAL, label="Y Pos", command=update_motor_2, length=800)
     scale_1.set(pos_x)
     scale_2.set(pos_y)
 
