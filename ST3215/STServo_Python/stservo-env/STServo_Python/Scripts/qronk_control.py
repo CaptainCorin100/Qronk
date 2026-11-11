@@ -3,6 +3,7 @@ import os
 import time
 import math
 from tkinter import *
+import numpy as np
 
 if os.name == 'nt':
     import msvcrt
@@ -36,6 +37,11 @@ FLOAT_ID = 6
 # If, when looking at a motor, a clockwise motion lowers the leg from neutral, then it has a direction of 1. Reverse case, -1.
 SHOULDER_DIRECT = -1
 FLOAT_DIRECT = 1
+
+# Max limits
+SHOULDER_MAX = 2669
+SHOULDER_MIN = 419
+STRETCH_LENGTH_MAX = 152
 
 # Length of limbs
 L0 = 60
@@ -71,6 +77,13 @@ def port_setup():
 
 # Convert a position in mm to a set of IK angles
 def convert_position_angle(x,y):
+    # Scale x and y if the leg is stretched out too much
+    radius = np.sqrt(x**2 + y**2)
+    max_radius = (2*L0*L1) + (L0**2 + L1**2)
+    if radius >= STRETCH_LENGTH_MAX:
+        x *= STRETCH_LENGTH_MAX/radius
+        y *= STRETCH_LENGTH_MAX/radius
+
     theta1 = math.acos((x**2 + y**2 - (L0**2 + L1**2))/(2*L0*L1))
     theta0 = math.atan2(y,x) - math.atan2(L1 * math.sin(theta1),(L0 + (L1*math.cos(theta1))))
 
@@ -87,6 +100,9 @@ def convert_angles_leg_motion(theta0, theta1, shoulder_direction, float_directio
     # Servo angle ranges from 0 to 4095, middle position is 2047
     shoulder_pos = int(2047 + (shoulder_direction * rad_to_motor(theta0)))
     float_pos = int(2047 + (float_direction * rad_to_motor(theta0 + theta1)))
+
+    # Restrict motor position to range to avoid clipping
+    shoulder_pos = sorted([SHOULDER_MIN, shoulder_pos, SHOULDER_MAX])[1]
 
     return (shoulder_pos, float_pos)
 
