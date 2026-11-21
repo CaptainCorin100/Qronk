@@ -151,6 +151,20 @@ def update_motor_2(a):
     (th0, th1) = convert_position_angle(pos_x, pos_y)
     go_to_angle(th0, th1)
 
+#Draws a semicircle swing pattern for a leg lifting backwards
+#TODO, currently, x is forwards and y is up
+def sample_semicircle_swing(num_steps, radius, x, y):
+    coords = []
+    # Note: all this motion should be in plane, so when code inevitably is updated to allow out of plane rotation, the position on that axis should be 0
+    for i in range(num_steps):
+        # Start at x + radius
+        x_output = x + radius * np.cos(np.pi * (i/num_steps))
+        y_output = y + radius * np.sin(np.pi * (i/num_steps))
+        coords.append((x_output, y_output))
+
+    return coords
+
+
 # Main loop: add the actual code in here
 if __name__ == "__main__":
     port_setup()
