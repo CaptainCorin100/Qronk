@@ -164,6 +164,20 @@ def sample_semicircle_swing(num_steps, radius, x, y):
 
     return coords
 
+def sample_line_swing(num_steps, x1,x2,y1,y2):
+    coords = []
+    for i in range(num_steps):
+        x_output = (1-(i/num_steps)) * x1 + (i/num_steps) * x2
+        y_output = (1-(i/num_steps)) * y1 + (i/num_steps) * y2
+        coords.append((x_output, y_output))
+
+    return coords
+
+#Moves through a list of coordinates, expressed as (x,y)
+def move_through_points(coords):
+    for (x_pos, y_pos) in coords:
+        (th0, th1) = convert_position_angle(x_pos, y_pos)
+        go_to_angle(th0, th1)
 
 # Main loop: add the actual code in here
 if __name__ == "__main__":
